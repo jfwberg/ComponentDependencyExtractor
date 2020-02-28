@@ -1,0 +1,56 @@
+// Package org: jfwberg
+
+// Unmanaged Package URL
+// "/packaging/installPackage.apexp?p0=04t0H000000xTLR"
+
+// Package convert
+//sfdx force:mdapi:retrieve -r c:\vs_code_ws\unpackage -p "Component Dependency Batch" -u jfwberg
+//sfdx force:mdapi:convert -r "c:\vs_code_ws\unpackage\Component Dependency Batch" -d c:\vs_code_ws\unpackage\unzip
+
+// Create User
+//https://page-dream-6584-dev-ed.cs86.my.salesforce.com/
+
+
+
+/*
+Description
+-	Tool to extract all component metadata depencies to an object so
+	the dependecies can be used in reports and analytics
+
+Configuration
+-	Metadata Items are stored in jst_Metadata_Item__c
+-	Metadata references are stoed in jst_Metadata_Item_Reference__c
+
+Retrieve metadata Items and Retrieve dependencies
+1)	Set the Metadata name field: Usually this is "Name" or "DeveloperName"
+2)	Set the Metadata type, I Suggest to start with "CustomObject"
+3)  Run attached code in anonymous
+4)	Repeat for all metadata items except for CustomField
+
+CustomFields
+- 	The dependency API is slightly useless for the amount of custom fields so 
+	a custom solution has been implemented specifically for custom fields
+1) Run above steps for CustomObject
+
+*/
+
+
+// Configuration
+String nameField 	= 'DeveloperName';
+String metadataType = 'CustomObject';
+ 
+// Create metadata items first, use
+// Start with this step to create all metadata items
+jst_ComponentDependency cd = new jst_ComponentDependency();
+Object[] metadataItemRecords = cd.ExecuteMetadataQuery(metadataType,nameField,'');
+cd.HandleCreateMetadataItemFromRecords(metadataItemRecords,metadataType,nameField);
+
+
+// Execute the batch for the new metadata type records
+String query = 'SELECT MetadataComponentId__c FROM jst_Metadata_Item__c WHERE  MetadataComponentType__c =\''+metadataType+'\'';
+database.executeBatch(new jst_BatchComponentDependency(query,'MetadataComponentId__c'),1);
+
+
+// Run this to get all custom fields
+//String query = 'SELECT MetadataComponentId__c FROM jst_Metadata_Item__c WHERE MetadataComponentType__c =\'CustomObject\'';
+//database.executeBatch(new jst_BatchComponentDependencyCustomField(query),1);

@@ -1,20 +1,28 @@
 /**
  *	@author			:	Justus van den Berg (jfwberg@gmail.com)
- *	@date			:	2020-01-13 20:00
- *	@description	:	Class for extracting component depencies to related objects whilst
- *						keeping the relationships intact so you can do proper reporting
- *	@note			:	Use with batch size 1 on Metadata SOQL queries (I.E. SELECT Id FROM ApexClass)
- *						!! It uses a lot of data and API calls in batch, to use for analytic reports only !!
+ *	@date			:	2020-01-13 22:00
+ *	@description	:	Batch class for extracting Component Dependencies
+ *
+ *	Copyright 2020 Justus van den Berg
+ *
+ *	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 public with sharing class jst_ComponentDependency {
     
 	// Constants
-	public final String		 TOOLING_API_VERSION				= '47.0';
+	public final String		 TOOLING_API_VERSION				= '48.0';
 	public final String		 TOOLING_RESPONSE_ATTRIBUTE_DONE 	= 'done';
 	public final String 	 TOOLING_RESPONSE_ATTRIBUTE_RECORDS	= 'records';
 	public final String 	 TOOLING_RESPONSE_ATTRIBUTE_SIZE	= 'totalSize';
 	public final Set<String> METADATA_TYPES = new Set<String>	{ 'ApexClass', 'ApexComponent', 'ApexPage', 'ApexTrigger', 'ApprovalProcess', 'AssignmentRule', 'AuraDefinitionBundle', 'CustomField', 'CustomLabel', 'CustomMetadata', 'CustomObject', 'CustomTab', 'Dashboard', 'EmailTemplate', 'EscalationRule', 'FieldSet', 'FlexiPage', 'Flow', 'FlowDefinition', 'GlobalValueSet', 'Group', 'HomePageLayout', 'Layout', 'MatchingRule', 'PermissionSet', 'Profile', 'Queue', 'QuickAction', 'Report', 'ReportType', 'Role', 'SharingSet', 'StaticResource', 'ValidationRule', 'WebLink', 'WorkflowAlert', 'WorkflowFieldUpdate', 'WorkflowRule', 'WorkflowTask'};
 	
+	// String to store the parent Id if applicable
+	public String parentId;
+
 	/**
 	 *	@description	:	Method for executing a Component dependency query based on an Id
 	 *						Tooling query will retrieve ALL depencies related to that specific metadata Id
@@ -39,7 +47,7 @@ public with sharing class jst_ComponentDependency {
 		request.setEndpoint(URL.getSalesforceBaseUrl().toExternalForm()+ '/services/data/v'+TOOLING_API_VERSION+'/tooling/query?q='+EncodingUtil.urlEncode(query, 'UTF-8'));
 		request.setMethod('GET');
 		request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-		request.setHeader('Authorization', 'Bearer ' + userInfo.getSessionId());
+		request.setHeader('Authorization', 'Bearer ' + ( test.isRunningTest()?'':Page.jst_getSessionId.getContent().toString().trim() ));
 		HttpResponse response = http.send(request);
 
 		// Check response code
@@ -81,22 +89,21 @@ public with sharing class jst_ComponentDependency {
 	 *						Tooling query will retrieve ALL depencies related to that specific metadata Id
 	 *	@note			:	Batch size limited to 1000
 	 */
-	public Object[] ExecuteMetadataQuery(String metadataType, String nameField, String whereClause) {
+	public Object[] ExecuteMetadataQuery(String metadataType, jst_ComponentDependencyExtractor.MetadataTypeDetails mdtDetails, String whereClause) {
 		
 		// Check if the metadata type is actually valid
 		if(METADATA_TYPES.contains(metadataType)){
 			
 			// Setup Tooling query
-			String 	query = 'SELECT Id, NamespacePrefix, ' + nameField +' FROM ' + metadataType+' '+whereClause+' LIMIT 1000';
-			
+			String 	query = 'SELECT Id, '+ (mdtDetails.includeNamespacePrefix?'NamespacePrefix,':'') + mdtDetails.nameField +' FROM ' + metadataType+' '+whereClause+' LIMIT 1000';
 					
 			// Create new API call to the tooling query using URL encoded query string
 			Http http = new Http();
 			HttpRequest request = new HttpRequest();
-			request.setEndpoint(URL.getSalesforceBaseUrl().toExternalForm()+ '/services/data/v'+TOOLING_API_VERSION+'/tooling/query?q='+EncodingUtil.urlEncode(query, 'UTF-8'));
+			request.setEndpoint(URL.getSalesforceBaseUrl().toExternalForm()+ '/services/data/v' + TOOLING_API_VERSION + (mdtDetails.useToolingApi?'/tooling':'') + '/query?q='+EncodingUtil.urlEncode(query, 'UTF-8'));
 			request.setMethod('GET');
 			request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-			request.setHeader('Authorization', 'Bearer ' + userInfo.getSessionId());
+			request.setHeader('Authorization', 'Bearer ' + ( test.isRunningTest()?'':Page.jst_getSessionId.getContent().toString().trim() ));
 			HttpResponse response = http.send(request);
 
 			// Check response code
@@ -155,6 +162,9 @@ public with sharing class jst_ComponentDependency {
 				
 				// Create the data map for the referenced record to extract the details
 				Map<String, Object> recordMap = (Map<String, Object>) records[i];
+				
+				// Fix for circle references in test data
+				if(test.isRunningTest()){this.parentId = null;}
 
 				// Create parent record
 				metadataItemRecordMap.put( (String) recordMap.get('Id'),
@@ -162,7 +172,8 @@ public with sharing class jst_ComponentDependency {
 						MetadataComponentId__c 			= (String) recordMap.get('Id'),
 						MetadataComponentNamespace__c 	= (String) recordMap.get('NamespacePrefix'),
 						MetadataComponentName__c		= (String) recordMap.get(nameField),
-						MetadataComponentType__c= type
+						MetadataComponentType__c		= type,
+						Parent_Metadata_Item__c			= this.parentId
 					)
 				);
 			}
@@ -245,6 +256,4 @@ public with sharing class jst_ComponentDependency {
 			}
 		}
 	}
-
-
 }

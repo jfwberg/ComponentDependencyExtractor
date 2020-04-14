@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FlexiPage</fullName>
+        <columns>NAME</columns>
+        <columns>MetadataComponentId__c</columns>
+        <columns>MetadataComponentType__c</columns>
+        <columns>MetadataComponentNamespace__c</columns>
+        <columns>MetadataComponentName__c</columns>
+        <columns>Number_of_metadata_references__c</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>MetadataComponentType__c</field>
+            <operation>equals</operation>
+            <value>FlexiPage</value>
+        </filters>
+        <label>FlexiPage</label>
+</ListView>

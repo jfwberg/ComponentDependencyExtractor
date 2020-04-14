@@ -1,0 +1,38 @@
+<aura:component implements="flexipage:availableForAllPageTypes" controller="jst_ComponentDependencyExtractor" access="global">
+
+	<!-- BASIC ATRRIBUTES -->
+	<aura:attribute name="loading"      		type="Boolean"	default="false"/>
+	<aura:attribute name="metadataTypes" 		type="String[]" default=""				access="global"/>
+	<aura:attribute name="selectedMetadataType" type="String" 	default="CustomObject"	access="global"/>
+
+	<!-- HANDLERS -->
+	<aura:handler name="init"	value="{!this}"	action="{!c.doInit}"/>
+
+	<!-- ADDITIONAL COMPONENTS -->
+	<lightning:notificationsLibrary aura:id="notifLib"/>
+	
+	<!-- MAIN LAYOUT -->
+	<lightning:card >
+		<aura:set attribute="title">
+			<lightning:icon iconName="utility:symbols" size="small"/>&nbsp;Update Component Dependencies
+		</aura:set>	
+		<aura:set attribute="actions">
+            <lightning:button label="Update" onclick="{!c.handleUpdate}"/>
+        </aura:set>
+		
+		<!-- SPINNER -->
+		<aura:if isTrue="{! v.loading }">
+				<lightning:spinner alternativeText="Loading" />
+		</aura:if>
+
+		<!-- CARD BODY -->
+		<p class="slds-p-horizontal_small">
+			<lightning:select name="mdSelect" aura:id="mdSelect" label="Select a metadata type" value="{!v.selectedMetadataType}">
+				<aura:iteration items="{!v.metadataTypes}" var="metadataType">
+						<option text="{!metadataType}" label="{!metadataType}" selected="{!metadataType == v.selectedMetadataType}"></option>
+					</aura:iteration>
+			</lightning:select>
+        </p>
+	</lightning:card>
+
+</aura:component>	

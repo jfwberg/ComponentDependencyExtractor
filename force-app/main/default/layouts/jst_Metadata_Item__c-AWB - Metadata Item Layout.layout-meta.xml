@@ -3,17 +3,13 @@
     <excludeButtons>Submit</excludeButtons>
     <layoutSections>
         <customLabel>false</customLabel>
-        <detailHeading>false</detailHeading>
+        <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
         <label>Information</label>
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
                 <field>MetadataComponentId__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Edit</behavior>
-                <field>MetadataComponentType__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
@@ -24,34 +20,50 @@
                 <field>MetadataComponentName__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
-                <field>Number_of_metadata_references__c</field>
+                <behavior>Edit</behavior>
+                <field>MetadataComponentType__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>Name</field>
+                <field>Number_of_metadata_references__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>OwnerId</field>
+                <field>Parent_Metadata_Item__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Parent_Metadata_Name__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Parent_Metadata_Type__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
     <layoutSections>
         <customLabel>false</customLabel>
-        <detailHeading>false</detailHeading>
+        <detailHeading>true</detailHeading>
         <editHeading>true</editHeading>
         <label>System Information</label>
         <layoutColumns>
+            <layoutItems>
+                <behavior>Readonly</behavior>
+                <field>Name</field>
+            </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>CreatedById</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>OwnerId</field>
+            </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>LastModifiedById</field>
@@ -72,21 +84,28 @@
     <relatedLists>
         <excludeButtons>MassChangeOwner</excludeButtons>
         <excludeButtons>New</excludeButtons>
-        <fields>Reference_Metadata_Item__c</fields>
-        <fields>MDR_MetadataComponentName__c</fields>
-        <fields>MDR_MetadataComponentType__c</fields>
-        <relatedList>jst_Metadata_Item_Reference__c.Metadata_Item__c</relatedList>
-        <sortField>MDR_MetadataComponentName__c</sortField>
-        <sortOrder>Asc</sortOrder>
+        <fields>Metadata_Item__c</fields>
+        <fields>MDI_MetadataComponentType__c</fields>
+        <fields>MDI_MetadataComponentName__c</fields>
+        <relatedList>jst_Metadata_Item_Reference__c.Reference_Metadata_Item__c</relatedList>
     </relatedLists>
     <relatedLists>
         <excludeButtons>MassChangeOwner</excludeButtons>
         <excludeButtons>New</excludeButtons>
-        <fields>Metadata_Item__c</fields>
-        <fields>MDI_MetadataComponentName__c</fields>
-        <fields>MDI_MetadataComponentType__c</fields>
-        <relatedList>jst_Metadata_Item_Reference__c.Reference_Metadata_Item__c</relatedList>
-        <sortField>MDI_MetadataComponentName__c</sortField>
+        <fields>Reference_Metadata_Item__c</fields>
+        <fields>MDR_MetadataComponentName__c</fields>
+        <fields>MDR_MetadataComponentType__c</fields>
+        <relatedList>jst_Metadata_Item_Reference__c.Metadata_Item__c</relatedList>
+    </relatedLists>
+    <relatedLists>
+        <excludeButtons>MassChangeOwner</excludeButtons>
+        <excludeButtons>New</excludeButtons>
+        <fields>NAME</fields>
+        <fields>MetadataComponentName__c</fields>
+        <fields>MetadataComponentType__c</fields>
+        <fields>Number_of_metadata_references__c</fields>
+        <relatedList>jst_Metadata_Item__c.Parent_Metadata_Item__c</relatedList>
+        <sortField>NAME</sortField>
         <sortOrder>Asc</sortOrder>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
@@ -95,7 +114,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h7E000001WTCQ</masterLabel>
+        <masterLabel>00h7E000001jUHz</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>

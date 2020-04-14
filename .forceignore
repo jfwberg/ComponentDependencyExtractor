@@ -3,6 +3,13 @@
 #
 
 package.xml
+force-app/main/default/profiles
+force-app/main/default/profilePasswordPolicies
+force-app/main/default/profileSessionSettings
+force-app/main/default/remoteSiteSettings
+force-app/main/default/authproviders
+force-app/main/default/namedCredentials
+force-app/main/default/appMenus
 
 # LWC configuration files
 **/jsconfig.json

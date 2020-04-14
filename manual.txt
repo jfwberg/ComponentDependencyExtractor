@@ -1,56 +1,28 @@
-// Package org: jfwberg
+## PACKAGE LINK
+https://login.salesforce.com/packaging/installPackage.apexp?p0=04t0H000000cb4R
 
-// Unmanaged Package URL
-// "/packaging/installPackage.apexp?p0=04t0H000000xTLR"
+## COMPONENT DEPENDENCY EXTRACTOR (CDE) ##
+The CDE is a tool to extract all metadata dependencies from the tooling API.
+This API has it's limitations so this tool is build to have a dirty way of just collecting the dependencies one by one in a batch manner.
+This is mainly a big issue with custom fields, the most used function.
 
-// Package convert
-//sfdx force:mdapi:retrieve -r c:\vs_code_ws\unpackage -p "Component Dependency Batch" -u jfwberg
-//sfdx force:mdapi:convert -r "c:\vs_code_ws\unpackage\Component Dependency Batch" -d c:\vs_code_ws\unpackage\unzip
+## HOW DOES IT WORK ##
+1) It has 2 custom obejcts, one to hold the metadata item and one one to hold the relationshipt between the two
+2) It queries all metadata for a specified type (except custom fields)
+3) Once queried, for each metadata item a batch runs to update the dependency
+4) All is updateble by pressing the update button in case of new objects
 
-// Create User
-//https://page-dream-6584-dev-ed.cs86.my.salesforce.com/
-
-
-
-/*
-Description
--	Tool to extract all component metadata depencies to an object so
-	the dependecies can be used in reports and analytics
-
-Configuration
--	Metadata Items are stored in jst_Metadata_Item__c
--	Metadata references are stoed in jst_Metadata_Item_Reference__c
-
-Retrieve metadata Items and Retrieve dependencies
-1)	Set the Metadata name field: Usually this is "Name" or "DeveloperName"
-2)	Set the Metadata type, I Suggest to start with "CustomObject"
-3)  Run attached code in anonymous
-4)	Repeat for all metadata items except for CustomField
-
-CustomFields
-- 	The dependency API is slightly useless for the amount of custom fields so 
-	a custom solution has been implemented specifically for custom fields
-1) Run above steps for CustomObject
-
-*/
+## POST INSTALL
+1) Add yourself to the component dependency extractor permission set
+2) open the component dependency extractor from the app launcher
+3) Select object and press update.
 
 
-// Configuration
-String nameField 	= 'DeveloperName';
-String metadataType = 'CustomObject';
- 
-// Create metadata items first, use
-// Start with this step to create all metadata items
-jst_ComponentDependency cd = new jst_ComponentDependency();
-Object[] metadataItemRecords = cd.ExecuteMetadataQuery(metadataType,nameField,'');
-cd.HandleCreateMetadataItemFromRecords(metadataItemRecords,metadataType,nameField);
+Note:
+- For CustomFields you first need to extract the custom objects
+- After custom object extraction the custom field depencies can be extracted, again by pressing the update button
+- Does not yet extract custom fields from standard objects
 
-
-// Execute the batch for the new metadata type records
-String query = 'SELECT MetadataComponentId__c FROM jst_Metadata_Item__c WHERE  MetadataComponentType__c =\''+metadataType+'\'';
-database.executeBatch(new jst_BatchComponentDependency(query,'MetadataComponentId__c'),1);
-
-
-// Run this to get all custom fields
-//String query = 'SELECT MetadataComponentId__c FROM jst_Metadata_Item__c WHERE MetadataComponentType__c =\'CustomObject\'';
-//database.executeBatch(new jst_BatchComponentDependencyCustomField(query),1);
+sfdx force:source:convert --outputdir mdapi_output_dir --packagename "Component Dependency Extractor"
+sfdx force:mdapi:deploy --deploydir mdapi_output_dir -u jfwberg
+sfdx force:mdapi:deploy:report -u jfwberg

@@ -1,7 +1,15 @@
 /**
  *	@author			:	Justus van den Berg (jfwberg@gmail.com)
  *	@date			:	2020-01-13 22:00
- *	@description	:	Test class for testing: jst_BatchComponentDependency and jst_ComponentDependency
+ *	@description	:	Batch class for extracting Component Dependencies
+ *
+ *	Copyright 2020 Justus van den Berg
+ *
+ *	Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 @IsTest
 global with sharing class jst_TestBatchComponentDependency implements HttpCalloutMock{
@@ -72,7 +80,7 @@ global with sharing class jst_TestBatchComponentDependency implements HttpCallou
 
 		// Create metadata items
 		jst_ComponentDependency cd = new jst_ComponentDependency();
-		Object[] metadataItemRecords = cd.ExecuteMetadataQuery('ApexClass','Name','');
+		Object[] metadataItemRecords = cd.ExecuteMetadataQuery('ApexClass',new jst_ComponentDependencyExtractor.MetadataTypeDetails('ApexClass','Name',true,true),'');
 		cd.HandleCreateMetadataItemFromRecords(metadataItemRecords,'ApexClass','Name');
 
 		// Stop the test
@@ -120,9 +128,8 @@ global with sharing class jst_TestBatchComponentDependency implements HttpCallou
 		jst_ComponentDependency componentDependency = new jst_ComponentDependency();
 		
 		try{componentDependency.ExecuteCompenentDepencyQueryFromId(UserInfo.getUserId());}catch(Exception e){}
-		try{componentDependency.ExecuteMetadataQuery('invalid','Id','');}catch(Exception e){}
-		try{componentDependency.ExecuteMetadataQuery('ApexClass','DeveloperName','');}catch(Exception e){}
-
+		try{componentDependency.ExecuteMetadataQuery('invalid',new jst_ComponentDependencyExtractor.MetadataTypeDetails('Invalid','Invalid',true,true),'');}catch(Exception e){}
+		try{componentDependency.ExecuteMetadataQuery('ApexClass',new jst_ComponentDependencyExtractor.MetadataTypeDetails('ApexClass','DeveloperName',false,true),'');}catch(Exception e){}
 
 		// Stop the test
 		test.stopTest();
